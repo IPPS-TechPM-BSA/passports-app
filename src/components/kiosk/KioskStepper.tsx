@@ -42,6 +42,22 @@ const INITIAL_DATA: KioskData = {
 
 const STEP_LABELS = ['Welcome', 'Visit Type', 'Contact & Service', 'Documents', 'Complete']
 
+interface ChecklistQuestion {
+  title: string
+  description: string
+}
+
+interface ChecklistQuestions {
+  [key: string]: ChecklistQuestion
+}
+
+const DEFAULT_CHECKLIST_QUESTIONS: ChecklistQuestions = {
+  photo: { title: 'Passport Photo', description: 'Do you have a 2x2 inch color photo taken within the last 6 months?' },
+  citizenship: { title: 'Proof of Citizenship', description: 'Do you have a certified birth certificate or naturalization certificate?' },
+  id: { title: 'Photo Identification', description: "Do you have a valid driver's license or government-issued ID?" },
+  payment: { title: 'Form of Payment', description: 'Do you have a credit card, check, or money order for processing fees?' },
+}
+
 export default function KioskStepper() {
   const { location } = useParams<{ location: string }>()
   const navigate = useNavigate()
@@ -50,12 +66,23 @@ export default function KioskStepper() {
   const [submitted, setSubmitted] = useState(false)
   const [countdown, setCountdown] = useState(10)
   const [alertMsg, setAlertMsg] = useState('')
+  const [checklistQuestions, setChecklistQuestions] = useState<ChecklistQuestions>(DEFAULT_CHECKLIST_QUESTIONS)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const locName = location === 'bookstore' ? 'Bookstore' : 'CSC'
 
   useEffect(() => {
     if (location) setKioskLocation(location as 'csc' | 'bookstore')
   }, [location, setKioskLocation])
+
+  useEffect(() => {
+    const fetchQs = async () => {
+      try {
+        const data = await api.getQuestions() as ChecklistQuestions
+        if (data && Object.keys(data).length) setChecklistQuestions(data)
+      } catch { /* fall back to defaults */ }
+    }
+    fetchQs()
+  }, [])
 
   const resetToWelcome = useCallback(() => {
     setData(INITIAL_DATA)
@@ -451,13 +478,15 @@ export default function KioskStepper() {
 
             {data.appComplete === true && ['photo', 'citizenship', 'id', 'payment'].map(field => {
               const val = data.checklist[field as keyof typeof data.checklist]
+              const question = checklistQuestions[field] ?? DEFAULT_CHECKLIST_QUESTIONS[field]
               return (
                 <div key={field} className="panel panel-default"
                   style={{ borderLeft: val === false ? '6px solid #E05D5D' : 'none' }}>
                   <div className="panel-body">
                     <div className="row">
                       <div className="col-sm-8">
-                        <strong style={{ textTransform: 'capitalize' }}>{field}</strong>
+                        <strong>{question.title}</strong>
+                        <p style={{ margin: '0.25rem 0 0', color: '#6B7C96' }}>{question.description}</p>
                       </div>
                       <div className="col-sm-4 text-right">
                         <div className="btn-group">
