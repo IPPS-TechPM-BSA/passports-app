@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext'
 import { t } from '../../services/translations'
 import { api } from '../../services/api'
 import { useIdleTimer } from '../../hooks/useIdleTimer'
-import { formatPhoneInput } from '../../utils/phone'
+import { formatPhoneInput } from '../utils/phone'
 
 type VisitType = 'appointment' | 'walk-in' | 'returning'
 type ServiceType = 'passports' | 'notary' | 'photo-only' | null
