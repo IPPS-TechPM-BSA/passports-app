@@ -60,6 +60,15 @@ body,
   h2.page-header { font-size: 1.4rem; }
 }
 
+/* Dashboard: let the content area use more of the screen on larger displays,
+   so tables like the Visitor Log get extra breathing room per column. */
+@media (min-width: 1200px) {
+  .dashboard-container { max-width: 1400px; }
+}
+@media (min-width: 1600px) {
+  .dashboard-container { max-width: 1700px; }
+}
+
 /* Focus ring for accessibility — matches UCSD Blue */
 a:focus, button:focus, .btn:focus, input:focus, select:focus, textarea:focus {
   outline: 3px solid #00629B;

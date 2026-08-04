@@ -3,8 +3,8 @@ import { useApp } from '../../context/AppContext'
 import { t } from '../../services/translations'
 
 const LOCATIONS = [
-  { id: 'csc' as const, name: 'CSC', icon: 'home', desc: 'Central Service Center' },
-  { id: 'bookstore' as const, name: 'Bookstore', icon: 'book', desc: 'UCSD Bookstore Location' },
+  { id: 'csc' as const, name: 'CSC', icon: 'home' },
+  { id: 'bookstore' as const, name: 'Bookstore', icon: 'book' },
 ]
 
 export default function LocationSelect() {
@@ -46,11 +46,10 @@ export default function LocationSelect() {
                   <span className={`glyphicon glyphicon-${loc.icon}`}
                     style={{ fontSize: '3rem', display: 'block', marginBottom: '0.75rem' }}></span>
                   <h3 className="panel-title" style={{ fontSize: '1.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    {t('checkin.at', { location: loc.name }, lang)}
+                    {loc.name}
                   </h3>
                 </div>
                 <div className="panel-body">
-                  <p style={{ color: '#6B7C96', margin: 0 }}>{loc.desc}</p>
                   <button className="btn btn-primary btn-lg" style={{ marginTop: '1rem', minWidth: 200 }}>
                     <span className="glyphicon glyphicon-log-in" style={{ marginRight: 8 }}></span>
                     {t('kiosk.start', undefined, lang)}

@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext'
 import { t } from '../../services/translations'
 import { api } from '../../services/api'
 import { useIdleTimer } from '../../hooks/useIdleTimer'
+import { formatPhoneInput } from '../../utils/phone'
 
 type VisitType = 'appointment' | 'walk-in' | 'returning'
 type ServiceType = 'passports' | 'notary' | 'photo-only' | null
@@ -20,7 +21,7 @@ interface KioskData {
     lastName: string
     email: string
     phone: string
-    subscribe: boolean
+    partySize: string
   }
   checklist: {
     photo: boolean | null
@@ -36,11 +37,11 @@ const INITIAL_DATA: KioskData = {
   serviceType: null,
   photoFormat: null,
   appComplete: null,
-  formData: { firstName: '', lastName: '', email: '', phone: '', subscribe: false },
+  formData: { firstName: '', lastName: '', email: '', phone: '', partySize: '' },
   checklist: { photo: null, citizenship: null, id: null, payment: null },
 }
 
-const STEP_LABELS = ['Welcome', 'Visit Type', 'Contact & Service', 'Documents', 'Complete']
+const STEP_LABELS = ['Welcome', 'Visit Type', 'Contact', 'Document', 'Complete']
 
 interface ChecklistQuestion {
   title: string
@@ -104,16 +105,41 @@ export default function KioskStepper() {
     setData(prev => ({ ...prev, checklist: { ...prev.checklist, [field]: value } }))
   }
 
+  // Decorator 5's .btn-primary is styled for large CTAs (min-width: 200px,
+  // bold uppercase, big padding). Coloring via inline style instead of
+  // swapping to that class keeps these toggle buttons a fixed size.
+  const yesNoBtnStyle = (selected: boolean) => ({
+    padding: '5px 10px',
+    fontSize: 12,
+    fontWeight: 400,
+    lineHeight: 1.5,
+    textTransform: 'none' as const,
+    letterSpacing: 'normal',
+    minWidth: 0,
+    borderRadius: 3,
+    border: `1px solid ${selected ? '#00629B' : '#ccc'}`,
+    background: selected ? '#00629B' : '#fff',
+    color: selected ? '#fff' : '#333',
+  })
+
   const validateContact = (): boolean => {
     setAlertMsg('')
     const fd = data.formData
-    if (!fd.firstName || !fd.lastName || !fd.phone) {
+    if (!fd.firstName || !fd.lastName || !fd.phone || !fd.partySize) {
       setAlertMsg(t('required.fields', undefined, currentLanguage))
       return false
     }
     const cleanPhone = fd.phone.replace(/\D/g, '')
     if (cleanPhone.length < 10) {
       setAlertMsg(t('invalid.phone', undefined, currentLanguage))
+      return false
+    }
+    if (!/^\d+$/.test(fd.partySize) || parseInt(fd.partySize, 10) < 1) {
+      setAlertMsg(t('invalid.partySize', undefined, currentLanguage))
+      return false
+    }
+    if (data.serviceType === 'photo-only' && !fd.email.trim()) {
+      setAlertMsg(t('required.email', undefined, currentLanguage))
       return false
     }
     if (fd.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fd.email.trim())) {
@@ -161,12 +187,12 @@ export default function KioskStepper() {
         last_name: data.formData.lastName,
         email: data.formData.email || null,
         phone: data.formData.phone,
+        party_size: parseInt(data.formData.partySize, 10),
         visit_type: data.visitType,
         service_type: data.serviceType,
         photo_format: data.serviceType === 'photo-only' ? data.photoFormat : null,
         app_complete: data.serviceType === 'passports' ? data.appComplete : null,
         checklist: checklistJson,
-        subscribe: data.formData.subscribe,
       })
       setData(prev => ({ ...prev, step: 4 }))
       setSubmitted(true)
@@ -216,7 +242,7 @@ export default function KioskStepper() {
 
   const stepIndicator = () => {
     const steps = [0, 1, 2, 3]
-    const active = data.step >= 4 ? 3 : data.step - 1
+    const active = data.step >= 4 ? 3 : data.step
     return (
       <div className="row" style={{ marginBottom: '2rem' }}>
         <div className="col-sm-12">
@@ -269,7 +295,7 @@ export default function KioskStepper() {
         return (
           <div className="text-center" style={{ padding: '2rem 0' }}>
             <h1 className="page-header" style={{ border: 'none', marginBottom: 0 }}>
-              UC San Diego Passports
+              Passports
             </h1>
             <p className="lead" style={{ marginBottom: '2rem' }}>
               {t('kiosk.subwelcome', undefined, currentLanguage)}
@@ -341,7 +367,7 @@ export default function KioskStepper() {
               <div className="col-sm-6">
                 <div className="form-group">
                   <label className="control-label">{t('step2.firstName', undefined, currentLanguage)} <span style={{ color: '#E05D5D' }}>*</span></label>
-                  <input type="text" className="form-control input-lg" placeholder="John"
+                  <input type="text" className="form-control input-lg"
                     value={data.formData.firstName}
                     onChange={e => updateFormData('firstName', e.target.value)} />
                 </div>
@@ -349,7 +375,7 @@ export default function KioskStepper() {
               <div className="col-sm-6">
                 <div className="form-group">
                   <label className="control-label">{t('step2.lastName', undefined, currentLanguage)} <span style={{ color: '#E05D5D' }}>*</span></label>
-                  <input type="text" className="form-control input-lg" placeholder="Doe"
+                  <input type="text" className="form-control input-lg"
                     value={data.formData.lastName}
                     onChange={e => updateFormData('lastName', e.target.value)} />
                 </div>
@@ -360,27 +386,34 @@ export default function KioskStepper() {
               <div className="col-sm-6">
                 <div className="form-group">
                   <label className="control-label">{t('step2.phone', undefined, currentLanguage)} <span style={{ color: '#E05D5D' }}>*</span></label>
-                  <input type="tel" className="form-control input-lg" placeholder="858-555-0199"
+                  <input type="tel" className="form-control input-lg"
                     value={data.formData.phone}
-                    onChange={e => updateFormData('phone', e.target.value)} />
+                    onChange={e => updateFormData('phone', formatPhoneInput(e.target.value))} />
                 </div>
               </div>
               <div className="col-sm-6">
                 <div className="form-group">
-                  <label className="control-label">{t('step2.email', undefined, currentLanguage)}</label>
-                  <input type="email" className="form-control input-lg" placeholder="optional"
+                  <label className="control-label">
+                    {t('step2.email', undefined, currentLanguage)}
+                    {data.serviceType === 'photo-only' && <span style={{ color: '#E05D5D' }}> *</span>}
+                  </label>
+                  <input type="email" className="form-control input-lg"
                     value={data.formData.email}
                     onChange={e => updateFormData('email', e.target.value)} />
                 </div>
               </div>
             </div>
 
-            <div className="checkbox" style={{ marginBottom: '1.5rem' }}>
-              <label>
-                <input type="checkbox" checked={data.formData.subscribe}
-                  onChange={e => updateFormData('subscribe', e.target.checked)} />
-                {' '}{t('step2.subscribe', undefined, currentLanguage)}
-              </label>
+            <div className="row">
+              <div className="col-sm-6">
+                <div className="form-group">
+                  <label className="control-label">{t('step2.partySize', undefined, currentLanguage)} <span style={{ color: '#E05D5D' }}>*</span></label>
+                  <input type="number" inputMode="numeric" min={1} step={1}
+                    className="form-control input-lg"
+                    value={data.formData.partySize}
+                    onChange={e => updateFormData('partySize', e.target.value.replace(/\D/g, ''))} />
+                </div>
+              </div>
             </div>
 
             {showServices && (
@@ -460,12 +493,12 @@ export default function KioskStepper() {
                   </div>
                   <div className="col-sm-4 text-right">
                     <div className="btn-group">
-                      <button className={`btn ${data.appComplete === true ? 'btn-primary' : 'btn-default'} btn-sm`}
+                      <button className="btn btn-sm" style={yesNoBtnStyle(data.appComplete === true)}
                         onClick={() => { set({ appComplete: true }) }}>
                         <span className="glyphicon glyphicon-ok" style={{ marginRight: 4 }}></span>
                         {t('yes', undefined, currentLanguage)}
                       </button>
-                      <button className={`btn ${data.appComplete === false ? 'btn-primary' : 'btn-default'} btn-sm`}
+                      <button className="btn btn-sm" style={yesNoBtnStyle(data.appComplete === false)}
                         onClick={() => { set({ appComplete: false, checklist: { photo: null, citizenship: null, id: null, payment: null } }) }}>
                         <span className="glyphicon glyphicon-remove" style={{ marginRight: 4 }}></span>
                         {t('no', undefined, currentLanguage)}
@@ -490,12 +523,12 @@ export default function KioskStepper() {
                       </div>
                       <div className="col-sm-4 text-right">
                         <div className="btn-group">
-                          <button className={`btn ${val === true ? 'btn-primary' : 'btn-default'} btn-sm`}
+                          <button className="btn btn-sm" style={yesNoBtnStyle(val === true)}
                             onClick={() => setChecklist(field, true)}>
                             <span className="glyphicon glyphicon-ok" style={{ marginRight: 4 }}></span>
                             {t('yes', undefined, currentLanguage)}
                           </button>
-                          <button className={`btn ${val === false ? 'btn-primary' : 'btn-default'} btn-sm`}
+                          <button className="btn btn-sm" style={yesNoBtnStyle(val === false)}
                             onClick={() => setChecklist(field, false)}>
                             <span className="glyphicon glyphicon-remove" style={{ marginRight: 4 }}></span>
                             {t('no', undefined, currentLanguage)}

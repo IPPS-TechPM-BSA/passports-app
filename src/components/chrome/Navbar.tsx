@@ -63,28 +63,11 @@ export default function Navbar() {
               </li>
             )}
             {isDashboard && auth && (
-              <>
-                <li className={path.includes('visitor-log') ? 'active' : ''}>
-                  <a href="/dashboard/visitor-log" onClick={e => { e.preventDefault(); navigate('/dashboard/visitor-log'); closeMobile() }}>
-                    {t('nav.visitorLog', undefined, lang)}
-                  </a>
-                </li>
-                <li className={path.includes('reports') ? 'active' : ''}>
-                  <a href="/dashboard/reports" onClick={e => { e.preventDefault(); navigate('/dashboard/reports'); closeMobile() }}>
-                    {t('nav.reports', undefined, lang)}
-                  </a>
-                </li>
-                <li className={path.includes('questions') ? 'active' : ''}>
-                  <a href="/dashboard/questions" onClick={e => { e.preventDefault(); navigate('/dashboard/questions'); closeMobile() }}>
-                    {t('nav.formQuestions', undefined, lang)}
-                  </a>
-                </li>
-                <li>
-                  <a href="/" onClick={e => { e.preventDefault(); logout(); navigate('/'); closeMobile() }}>
-                    {t('nav.lockDashboard', undefined, lang)}
-                  </a>
-                </li>
-              </>
+              <li>
+                <a href="/" onClick={e => { e.preventDefault(); logout(); navigate('/'); closeMobile() }}>
+                  {t('nav.lockDashboard', undefined, lang)}
+                </a>
+              </li>
             )}
             {isKiosk && (
               <li className="active">

@@ -6,6 +6,7 @@ import os
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse, FileResponse
@@ -56,6 +57,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="UC San Diego Passports API", lifespan=lifespan)
+
+# Visitor check-in/sign-out timestamps are stored as naive UTC (see models.py);
+# reports and exports display them in Pacific time for on-site staff.
+PACIFIC = ZoneInfo("America/Los_Angeles")
 
 
 @app.middleware("http")
@@ -123,6 +128,7 @@ async def checkin(
         last_name=body.last_name,
         email=body.email or None,
         phone=body.phone,
+        party_size=body.party_size,
         visit_type=body.visit_type,
         service_type=body.service_type or None,
         photo_format=body.photo_format or None,
@@ -236,17 +242,26 @@ async def export_visitors(
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow([
-        "ID", "First Name", "Last Name", "Email", "Phone",
+        "ID", "First Name", "Last Name", "Email", "Phone", "Party Size",
         "Visit Type", "Service Type", "Photo Format",
         "Application Complete", "Checklist",
         "Subscribe", "Notes", "Status",
-        "Check-In Date", "Check-In Time", "Sign-Out Time",
+        "Check-In Date (PT)", "Check-In Time (PT)", "Sign-Out Time (PT)",
     ])
 
+    def to_pacific(dt):
+        if dt is None:
+            return None
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(PACIFIC)
+
     def fmt_date(dt):
+        dt = to_pacific(dt)
         return dt.strftime("%Y-%m-%d") if dt else ""
 
     def fmt_time(dt):
+        dt = to_pacific(dt)
         return dt.strftime("%H:%M") if dt else ""
 
     def yes_no(val):
@@ -256,13 +271,22 @@ async def export_visitors(
             return "No"
         return ""
 
+    def fmt_phone(raw):
+        digits = "".join(ch for ch in (raw or "") if ch.isdigit())
+        if len(digits) == 10:
+            return f"{digits[0:3]}-{digits[3:6]}-{digits[6:10]}"
+        if len(digits) == 11 and digits[0] == "1":
+            return f"1-{digits[1:4]}-{digits[4:7]}-{digits[7:11]}"
+        return raw
+
     for v in visitors:
         writer.writerow([
             escape_csv_formula_cell(v.id),
             escape_csv_formula_cell(v.first_name),
             escape_csv_formula_cell(v.last_name),
             escape_csv_formula_cell(v.email),
-            escape_csv_formula_cell(v.phone),
+            escape_csv_formula_cell(fmt_phone(v.phone)),
+            escape_csv_formula_cell(v.party_size),
             escape_csv_formula_cell(v.visit_type),
             escape_csv_formula_cell(v.service_type),
             escape_csv_formula_cell(v.photo_format),

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useApp } from '../../context/AppContext'
 import { t } from '../../services/translations'
+import { formatPhoneDisplay } from '../../utils/phone'
 
 interface Subscriber {
   first_name: string
   last_name: string
-  email: string
+  email: string | null
   phone: string
   check_in_at: string
 }
@@ -26,7 +27,7 @@ export default function SubscriberList() {
       })
       if (res.ok) {
         const all: any[] = await res.json()
-        setSubscribers(all.filter(v => v.subscribe && v.email))
+        setSubscribers(all)
       }
     } catch { /* ignore */ }
     finally { setLoading(false) }
@@ -45,8 +46,8 @@ export default function SubscriberList() {
     const rows = subscribers.map(s =>
       [
         csvCell(`${s.first_name} ${s.last_name}`),
-        csvCell(s.email),
-        csvCell(s.phone),
+        csvCell(s.email || ''),
+        csvCell(formatPhoneDisplay(s.phone)),
         csvCell(new Date(s.check_in_at).toLocaleDateString()),
       ].join(',')
     ).join('\n')
@@ -70,7 +71,6 @@ export default function SubscriberList() {
           {t('subscribers.export', undefined, lang)}
         </button>
       </div>
-      <p>{t('subscribers.desc', undefined, lang)}</p>
 
       <div className="table-responsive">
         <table className="table table-striped">
@@ -88,8 +88,8 @@ export default function SubscriberList() {
             ) : subscribers.map((s, i) => (
               <tr key={i}>
                 <td><strong>{s.first_name} {s.last_name}</strong></td>
-                <td><code>{s.email}</code></td>
-                <td>{s.phone}</td>
+                <td>{s.email ? <code>{s.email}</code> : <span style={{ color: '#ccc' }}>—</span>}</td>
+                <td>{formatPhoneDisplay(s.phone)}</td>
                 <td>{new Date(s.check_in_at).toLocaleDateString()}</td>
               </tr>
             ))}
