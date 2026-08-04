@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useApp } from '../../context/AppContext'
 import { t } from '../../services/translations'
-import { formatPhoneDisplay } from '../../utils/phone'
 
 interface Subscriber {
   first_name: string
@@ -10,14 +9,12 @@ interface Subscriber {
   phone: string
   check_in_at: string
 }
-
 export default function SubscriberList() {
   const { auth, currentLanguage } = useApp()
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
   const locId = auth?.locationId || 'csc'
   const lang = currentLanguage
-
   const fetchAll = useCallback(async () => {
     if (!auth) return
     setLoading(true)
@@ -32,22 +29,18 @@ export default function SubscriberList() {
     } catch { /* ignore */ }
     finally { setLoading(false) }
   }, [auth, locId])
-
   useEffect(() => { fetchAll() }, [fetchAll])
-
   const escapeCsvFormulaCell = (value: string) =>
     /^[=+\-@\t\r\n＝＋－＠]/.test(value) ? `'${value}` : value
-
   const csvCell = (value: string) =>
     `"${escapeCsvFormulaCell(value).replace(/"/g, '""')}"`
-
   const exportCSV = () => {
     const header = `${t('subscribers.colName', undefined, lang)},${t('subscribers.colEmail', undefined, lang)},${t('subscribers.colPhone', undefined, lang)},${t('subscribers.colOptIn', undefined, lang)}\n`
     const rows = subscribers.map(s =>
       [
         csvCell(`${s.first_name} ${s.last_name}`),
         csvCell(s.email || ''),
-        csvCell(formatPhoneDisplay(s.phone)),
+        csvCell(s.phone),
         csvCell(new Date(s.check_in_at).toLocaleDateString()),
       ].join(',')
     ).join('\n')
@@ -59,9 +52,7 @@ export default function SubscriberList() {
     a.click()
     URL.revokeObjectURL(url)
   }
-
   if (loading) return <p style={{ color: '#999' }}>{t('visitorLog.loading', undefined, lang)}</p>
-
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -71,7 +62,6 @@ export default function SubscriberList() {
           {t('subscribers.export', undefined, lang)}
         </button>
       </div>
-
       <div className="table-responsive">
         <table className="table table-striped">
           <thead>
@@ -89,7 +79,7 @@ export default function SubscriberList() {
               <tr key={i}>
                 <td><strong>{s.first_name} {s.last_name}</strong></td>
                 <td>{s.email ? <code>{s.email}</code> : <span style={{ color: '#ccc' }}>—</span>}</td>
-                <td>{formatPhoneDisplay(s.phone)}</td>
+                <td>{s.phone}</td>
                 <td>{new Date(s.check_in_at).toLocaleDateString()}</td>
               </tr>
             ))}
