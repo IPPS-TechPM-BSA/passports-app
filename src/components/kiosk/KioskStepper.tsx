@@ -4,7 +4,6 @@ import { useApp } from '../../context/AppContext'
 import { t } from '../../services/translations'
 import { api } from '../../services/api'
 import { useIdleTimer } from '../../hooks/useIdleTimer'
-import { formatPhoneInput } from '../../utils/phone'
 
 type VisitType = 'appointment' | 'walk-in' | 'returning'
 type ServiceType = 'passports' | 'notary' | 'photo-only' | null
@@ -388,7 +387,7 @@ export default function KioskStepper() {
                   <label className="control-label">{t('step2.phone', undefined, currentLanguage)} <span style={{ color: '#E05D5D' }}>*</span></label>
                   <input type="tel" className="form-control input-lg"
                     value={data.formData.phone}
-                    onChange={e => updateFormData('phone', formatPhoneInput(e.target.value))} />
+                    onChange={e => updateFormData('phone', e.target.value)} />
                 </div>
               </div>
               <div className="col-sm-6">
