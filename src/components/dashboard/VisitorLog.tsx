@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import { t } from '../../services/translations'
-import { formatPhoneDisplay } from '../../utils/phone'
 
 const COL_WIDTHS_STORAGE_KEY = 'visitorLog.colWidths'
 
@@ -228,7 +227,7 @@ export default function VisitorLog() {
                   <td style={{ whiteSpace: 'nowrap', textAlign: 'center', verticalAlign: 'middle' }}>
                     <strong>{v.first_name} {v.last_name}</strong>
                     <div style={{ fontSize: '0.75rem', color: '#6B7C96', lineHeight: 1.3 }}>
-                      <div>{formatPhoneDisplay(v.phone)}</div>
+                      <div>{v.phone}</div>
                       {v.email && <div>{v.email}</div>}
                     </div>
                   </td>
