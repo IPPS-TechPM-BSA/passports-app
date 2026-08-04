@@ -5,7 +5,7 @@ type Translations = Record<Language, TranslationMap>
 
 const translations: Translations = {
   en: {
-    'site.name': 'UC San Diego Passports',
+    'site.name': 'Passports',
 
     'nav.home': 'Home',
     'nav.visitorLog': 'Visitor Log',
@@ -14,7 +14,6 @@ const translations: Translations = {
     'nav.lockDashboard': 'Lock Dashboard',
     'nav.checkin': 'Check-In',
 
-    'checkin.at': 'Check-In @ {location}',
     'dashboard.link': 'Employee Dashboard',
     'dashboard.login': 'Dashboard Login',
 
@@ -31,7 +30,7 @@ const translations: Translations = {
     'step2.lastName': 'Last Name',
     'step2.email': 'Email Address',
     'step2.phone': 'Phone Number',
-    'step2.subscribe': 'Subscribe to UC San Diego Passports newsletter & updates',
+    'step2.partySize': 'How many people are in your party?',
 
     'service.title': 'What service do you need today?',
     'service.passports': 'Passport',
@@ -63,8 +62,10 @@ const translations: Translations = {
     'required.fields': 'Please fill in all required fields.',
     'select.service': 'Please select a service to continue.',
     'invalid.phone': 'Please enter a valid 10-digit phone number.',
+    'invalid.partySize': 'Please enter a valid number of people (1 or more).',
     'invalid.email': "That email doesn't look valid.",
     'select.photoFormat': 'Please choose a photo type.',
+    'required.email': 'An email address is required to receive digital photos.',
     'confirm.appComplete': 'Please answer whether your passport application is complete.',
     'confirm.checklist': 'Please confirm all document check questions before submitting.',
 
@@ -82,20 +83,20 @@ const translations: Translations = {
     'visitorLog.search': 'Search by name, email, phone\u2026',
     'visitorLog.clear': 'Clear',
     'visitorLog.signOut': 'Sign Out',
-    'visitorLog.signedOut': 'Signed Out',
     'visitorLog.loading': 'Loading\u2026',
     'visitorLog.noRecords': 'No records match current filters.',
     'visitorLog.addNote': 'Add note\u2026',
     'visitorLog.colVisitor': 'Visitor',
     'visitorLog.colService': 'Service',
-    'visitorLog.colStatus': 'Status',
+    'visitorLog.colPartySize': 'Party Size',
+    'visitorLog.colStatus': 'Signed In',
     'visitorLog.colApp': 'App',
     'visitorLog.colPhoto': 'Photo',
     'visitorLog.colCitizen': 'Citizen',
     'visitorLog.colId': 'ID',
     'visitorLog.colPayment': 'Pay',
     'visitorLog.colNotes': 'Notes',
-    'visitorLog.colAction': 'Action',
+    'visitorLog.colAction': 'Signed Out',
 
     'reports.title': 'Reports',
     'reports.totalVisits': 'Total Visits',
@@ -107,8 +108,8 @@ const translations: Translations = {
 
     'formQuestions.title': 'Form Questions',
     'formQuestions.desc': 'Edit the questions shown on the kiosk document checklist.',
-    'formQuestions.heading': 'Heading (shown on kiosk)',
-    'formQuestions.description': 'Description (shown under heading)',
+    'formQuestions.heading': 'Heading',
+    'formQuestions.description': 'Description',
     'formQuestions.save': 'Save',
     'formQuestions.saving': 'Saving\u2026',
     'formQuestions.saved': 'Questions saved successfully.',
@@ -117,13 +118,12 @@ const translations: Translations = {
     'formQuestions.reset': 'Reset Defaults',
 
     'subscribers.title': 'Subscriber Directory',
-    'subscribers.desc': 'Visitors who opted into email communications.',
     'subscribers.export': 'Export CSV',
     'subscribers.noRecords': 'No subscribers found.',
     'subscribers.colName': 'Name',
     'subscribers.colEmail': 'Email',
     'subscribers.colPhone': 'Phone',
-    'subscribers.colOptIn': 'Opt-In Date',
+    'subscribers.colOptIn': 'Visit Date',
 
     'qr.title': 'QR Code \u2014 {location}',
     'qr.desc': 'Print or display this QR code at the {location} greeting desk so visitors can check in using their own phone.',
@@ -132,7 +132,7 @@ const translations: Translations = {
   },
 
   es: {
-    'site.name': 'UC San Diego Passports',
+    'site.name': 'Passports',
 
     'nav.home': 'Inicio',
     'nav.visitorLog': 'Registro de Visitantes',
@@ -141,7 +141,6 @@ const translations: Translations = {
     'nav.lockDashboard': 'Cerrar Panel',
     'nav.checkin': 'Registro',
 
-    'checkin.at': 'Registro en {location}',
     'dashboard.link': 'Panel de Empleados',
     'dashboard.login': 'Inicio de Sesión',
 
@@ -158,7 +157,7 @@ const translations: Translations = {
     'step2.lastName': 'Apellido',
     'step2.email': 'Correo Electrónico',
     'step2.phone': 'Número de Teléfono',
-    'step2.subscribe': 'Suscríbase al boletín y novedades de UC San Diego Passports',
+    'step2.partySize': '¿Cuántas personas hay en su grupo?',
 
     'service.title': '¿Qué servicio necesita hoy?',
     'service.passports': 'Pasaporte',
@@ -190,8 +189,10 @@ const translations: Translations = {
     'required.fields': 'Por favor complete todos los campos obligatorios.',
     'select.service': 'Por favor seleccione un servicio para continuar.',
     'invalid.phone': 'Ingrese un número de teléfono válido de 10 dígitos.',
+    'invalid.partySize': 'Ingrese un número válido de personas (1 o más).',
     'invalid.email': 'El correo electrónico no parece válido.',
     'select.photoFormat': 'Por favor elija un tipo de foto.',
+    'required.email': 'Se requiere una dirección de correo electrónico para recibir fotos digitales.',
     'confirm.appComplete': 'Por favor indique si su solicitud de pasaporte está completa.',
     'confirm.checklist': 'Por favor confirme todas las preguntas antes de enviar.',
 
@@ -209,20 +210,20 @@ const translations: Translations = {
     'visitorLog.search': 'Buscar por nombre, correo o teléfono\u2026',
     'visitorLog.clear': 'Limpiar',
     'visitorLog.signOut': 'Salida',
-    'visitorLog.signedOut': 'Salió',
     'visitorLog.loading': 'Cargando\u2026',
     'visitorLog.noRecords': 'No hay registros que coincidan.',
     'visitorLog.addNote': 'Añadir nota\u2026',
     'visitorLog.colVisitor': 'Visitante',
     'visitorLog.colService': 'Servicio',
-    'visitorLog.colStatus': 'Estado',
+    'visitorLog.colPartySize': 'Tamaño del Grupo',
+    'visitorLog.colStatus': 'Hora de Entrada',
     'visitorLog.colApp': 'Solic.',
     'visitorLog.colPhoto': 'Foto',
     'visitorLog.colCitizen': 'Ciudad.',
     'visitorLog.colId': 'ID',
     'visitorLog.colPayment': 'Pago',
     'visitorLog.colNotes': 'Notas',
-    'visitorLog.colAction': 'Acción',
+    'visitorLog.colAction': 'Hora de Salida',
 
     'reports.title': 'Informes',
     'reports.totalVisits': 'Visitas Totales',
@@ -234,8 +235,8 @@ const translations: Translations = {
 
     'formQuestions.title': 'Preguntas del Formulario',
     'formQuestions.desc': 'Edite las preguntas que se muestran en el quiosco.',
-    'formQuestions.heading': 'Título (mostrado en el quiosco)',
-    'formQuestions.description': 'Descripción (mostrada bajo el título)',
+    'formQuestions.heading': 'Título',
+    'formQuestions.description': 'Descripción',
     'formQuestions.save': 'Guardar',
     'formQuestions.saving': 'Guardando\u2026',
     'formQuestions.saved': 'Preguntas guardadas exitosamente.',
@@ -244,13 +245,12 @@ const translations: Translations = {
     'formQuestions.reset': 'Restablecer Valores',
 
     'subscribers.title': 'Directorio de Suscriptores',
-    'subscribers.desc': 'Visitantes que optaron por recibir correos electrónicos.',
     'subscribers.export': 'Exportar CSV',
     'subscribers.noRecords': 'No se encontraron suscriptores.',
     'subscribers.colName': 'Nombre',
     'subscribers.colEmail': 'Correo',
     'subscribers.colPhone': 'Teléfono',
-    'subscribers.colOptIn': 'Fecha de Suscripción',
+    'subscribers.colOptIn': 'Fecha de Visita',
 
     'qr.title': 'Código QR \u2014 {location}',
     'qr.desc': 'Imprima o muestre este código QR en el escritorio de {location} para que los visitantes se registren con su teléfono.',
@@ -259,7 +259,7 @@ const translations: Translations = {
   },
 
   zh: {
-    'site.name': 'UC San Diego Passports',
+    'site.name': 'Passports',
 
     'nav.home': '首页',
     'nav.visitorLog': '访客记录',
@@ -268,7 +268,6 @@ const translations: Translations = {
     'nav.lockDashboard': '锁定面板',
     'nav.checkin': '登记',
 
-    'checkin.at': '{location} 登记',
     'dashboard.link': '员工控制面板',
     'dashboard.login': '登录控制面板',
 
@@ -285,7 +284,7 @@ const translations: Translations = {
     'step2.lastName': '姓',
     'step2.email': '电子邮件',
     'step2.phone': '电话号码',
-    'step2.subscribe': '订阅 UC San Diego 护照服务的新闻与更新',
+    'step2.partySize': '您的同行人数是多少？',
 
     'service.title': '您今天需要哪项服务？',
     'service.passports': '护照',
@@ -317,8 +316,10 @@ const translations: Translations = {
     'required.fields': '请填写所有必填字段。',
     'select.service': '请选择一项服务以继续。',
     'invalid.phone': '请输入有效的10位电话号码。',
+    'invalid.partySize': '请输入有效的人数（1或以上）。',
     'invalid.email': '电子邮件格式不正确。',
     'select.photoFormat': '请选择照片类型。',
+    'required.email': '接收数字照片需要提供电子邮件地址。',
     'confirm.appComplete': '请确认您的护照申请表是否完整。',
     'confirm.checklist': '请在提交前确认所有文件检查问题。',
 
@@ -336,20 +337,20 @@ const translations: Translations = {
     'visitorLog.search': '按姓名、电子邮件或电话搜索\u2026',
     'visitorLog.clear': '清除',
     'visitorLog.signOut': '签出',
-    'visitorLog.signedOut': '已签出',
     'visitorLog.loading': '加载中\u2026',
     'visitorLog.noRecords': '没有匹配的记录。',
     'visitorLog.addNote': '添加备注\u2026',
     'visitorLog.colVisitor': '访客',
     'visitorLog.colService': '服务',
-    'visitorLog.colStatus': '状态',
+    'visitorLog.colPartySize': '人数',
+    'visitorLog.colStatus': '签到时间',
     'visitorLog.colApp': '申请',
     'visitorLog.colPhoto': '照片',
     'visitorLog.colCitizen': '公民',
     'visitorLog.colId': '证件',
     'visitorLog.colPayment': '支付',
     'visitorLog.colNotes': '备注',
-    'visitorLog.colAction': '操作',
+    'visitorLog.colAction': '签出时间',
 
     'reports.title': '报告',
     'reports.totalVisits': '总访问量',
@@ -361,8 +362,8 @@ const translations: Translations = {
 
     'formQuestions.title': '表格问题',
     'formQuestions.desc': '编辑在自助服务机上显示的问题。',
-    'formQuestions.heading': '标题（在自助服务机上显示）',
-    'formQuestions.description': '描述（在标题下方显示）',
+    'formQuestions.heading': '标题',
+    'formQuestions.description': '描述',
     'formQuestions.save': '保存',
     'formQuestions.saving': '保存中\u2026',
     'formQuestions.saved': '问题已成功保存。',
@@ -371,13 +372,12 @@ const translations: Translations = {
     'formQuestions.reset': '恢复默认',
 
     'subscribers.title': '订阅者目录',
-    'subscribers.desc': '选择接收电子邮件的访客。',
     'subscribers.export': '导出 CSV',
     'subscribers.noRecords': '未找到订阅者。',
     'subscribers.colName': '姓名',
     'subscribers.colEmail': '电子邮件',
     'subscribers.colPhone': '电话',
-    'subscribers.colOptIn': '订阅日期',
+    'subscribers.colOptIn': '访问日期',
 
     'qr.title': '二维码 \u2014 {location}',
     'qr.desc': '在 {location} 接待处打印或展示此二维码，访客可使用自己的手机登记。',
@@ -386,7 +386,7 @@ const translations: Translations = {
   },
 
   vi: {
-    'site.name': 'UC San Diego Passports',
+    'site.name': 'Passports',
 
     'nav.home': 'Trang chủ',
     'nav.visitorLog': 'Sổ Khách',
@@ -395,7 +395,6 @@ const translations: Translations = {
     'nav.lockDashboard': 'Khóa Bảng Điều Khiển',
     'nav.checkin': 'Đăng ký',
 
-    'checkin.at': 'Đăng ký tại {location}',
     'dashboard.link': 'Bảng Điều Khiển Nhân Viên',
     'dashboard.login': 'Đăng Nhập',
 
@@ -412,7 +411,7 @@ const translations: Translations = {
     'step2.lastName': 'Họ',
     'step2.email': 'Địa chỉ Email',
     'step2.phone': 'Số Điện thoại',
-    'step2.subscribe': 'Đăng ký nhận bản tin & cập nhật từ UC San Diego Passports',
+    'step2.partySize': 'Nhóm của bạn có bao nhiêu người?',
 
     'service.title': 'Bạn cần dịch vụ nào hôm nay?',
     'service.passports': 'Hộ chiếu',
@@ -444,8 +443,10 @@ const translations: Translations = {
     'required.fields': 'Vui lòng điền đầy đủ các thông tin bắt buộc.',
     'select.service': 'Vui lòng chọn một dịch vụ để tiếp tục.',
     'invalid.phone': 'Vui lòng nhập số điện thoại 10 chữ số hợp lệ.',
+    'invalid.partySize': 'Vui lòng nhập số người hợp lệ (từ 1 trở lên).',
     'invalid.email': 'Email không hợp lệ.',
     'select.photoFormat': 'Vui lòng chọn loại ảnh.',
+    'required.email': 'Cần có địa chỉ email để nhận ảnh kỹ thuật số.',
     'confirm.appComplete': 'Vui lòng trả lời đơn xin hộ chiếu của bạn đã hoàn tất chưa.',
     'confirm.checklist': 'Vui lòng xác nhận tất cả các câu hỏi trước khi gửi.',
 
@@ -463,20 +464,20 @@ const translations: Translations = {
     'visitorLog.search': 'Tìm theo tên, email hoặc số điện thoại\u2026',
     'visitorLog.clear': 'Xóa',
     'visitorLog.signOut': 'Ký Ra',
-    'visitorLog.signedOut': 'Đã ký ra',
     'visitorLog.loading': 'Đang tải\u2026',
     'visitorLog.noRecords': 'Không có bản ghi nào phù hợp.',
     'visitorLog.addNote': 'Thêm ghi chú\u2026',
     'visitorLog.colVisitor': 'Khách',
     'visitorLog.colService': 'Dịch vụ',
-    'visitorLog.colStatus': 'Trạng thái',
+    'visitorLog.colPartySize': 'Số Người',
+    'visitorLog.colStatus': 'Giờ Vào',
     'visitorLog.colApp': 'Đơn',
     'visitorLog.colPhoto': 'Ảnh',
     'visitorLog.colCitizen': 'Quốc tịch',
     'visitorLog.colId': 'CMND',
     'visitorLog.colPayment': 'T.toán',
     'visitorLog.colNotes': 'Ghi chú',
-    'visitorLog.colAction': 'H.động',
+    'visitorLog.colAction': 'Giờ Ra',
 
     'reports.title': 'Báo cáo',
     'reports.totalVisits': 'Tổng Số Lượt',
@@ -488,8 +489,8 @@ const translations: Translations = {
 
     'formQuestions.title': 'Câu hỏi',
     'formQuestions.desc': 'Chỉnh sửa các câu hỏi hiển thị trên quầy đăng ký.',
-    'formQuestions.heading': 'Tiêu đề (hiển thị trên quầy)',
-    'formQuestions.description': 'Mô tả (hiển thị dưới tiêu đề)',
+    'formQuestions.heading': 'Tiêu đề',
+    'formQuestions.description': 'Mô tả',
     'formQuestions.save': 'Lưu',
     'formQuestions.saving': 'Đang lưu\u2026',
     'formQuestions.saved': 'Câu hỏi đã được lưu.',
@@ -498,13 +499,12 @@ const translations: Translations = {
     'formQuestions.reset': 'Đặt lại Mặc định',
 
     'subscribers.title': 'Danh sách Người Đăng ký',
-    'subscribers.desc': 'Khách đã chọn nhận email.',
     'subscribers.export': 'Xuất CSV',
     'subscribers.noRecords': 'Không tìm thấy người đăng ký.',
     'subscribers.colName': 'Tên',
     'subscribers.colEmail': 'Email',
     'subscribers.colPhone': 'Điện thoại',
-    'subscribers.colOptIn': 'Ngày Đăng ký',
+    'subscribers.colOptIn': 'Ngày Đến',
 
     'qr.title': 'Mã QR \u2014 {location}',
     'qr.desc': 'In hoặc hiển thị mã QR này tại quầy {location} để khách đăng ký bằng điện thoại của họ.',
