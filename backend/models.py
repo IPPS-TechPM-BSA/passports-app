@@ -25,6 +25,7 @@ class Visitor(Base):
     last_name = Column(String(100), nullable=False)
     email = Column(String(255), nullable=True)
     phone = Column(String(20), nullable=False)
+    party_size = Column(Integer, nullable=True)
     visit_type = Column(String(20), nullable=False)       # appointment, walk-in, returning
     service_type = Column(String(20), nullable=True)      # passports, notary, photo-only
     photo_format = Column(String(20), nullable=True)      # digital, both, printed
