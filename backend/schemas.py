@@ -2,10 +2,11 @@ import json
 import re
 from pydantic import BaseModel
 from pydantic import Field
+from pydantic import field_serializer
 from pydantic import field_validator
 from pydantic import model_validator
 from typing import Literal, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 CHECKLIST_FIELDS = {"photo", "citizenship", "id", "payment"}
@@ -17,6 +18,7 @@ class CheckinRequest(BaseModel):
     last_name: str = Field(min_length=1, max_length=100)
     email: Optional[str] = Field(default=None, max_length=255)
     phone: str = Field(min_length=7, max_length=20)
+    party_size: int = Field(ge=1, le=50)
     visit_type: Literal["appointment", "walk-in", "returning"]
     service_type: Optional[Literal["passports", "notary", "photo-only"]] = None
     photo_format: Optional[Literal["digital", "both", "printed"]] = None
@@ -85,6 +87,7 @@ class VisitorResponse(BaseModel):
     last_name: str
     email: Optional[str] = None
     phone: str
+    party_size: Optional[int] = None
     visit_type: str
     service_type: Optional[str] = None
     photo_format: Optional[str] = None
@@ -97,6 +100,18 @@ class VisitorResponse(BaseModel):
     sign_out_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+    @field_serializer("check_in_at", "sign_out_at")
+    def serialize_as_utc(self, dt: Optional[datetime]) -> Optional[str]:
+        # SQLite drops tzinfo on round-trip even though these are always
+        # written as UTC (see models.py). Reattach it here so clients get an
+        # unambiguous offset instead of a naive string that gets parsed as
+        # the browser's local time.
+        if dt is None:
+            return None
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.isoformat()
 
 
 class StatusUpdate(BaseModel):
