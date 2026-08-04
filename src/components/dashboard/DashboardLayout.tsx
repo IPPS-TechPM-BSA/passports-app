@@ -36,15 +36,19 @@ export default function DashboardLayout() {
 
   return (
     <div className="layout-main" id="main-content" role="main">
-      <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
+      <div className="container dashboard-container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
         <div className="row">
-          <div className="col-sm-3">
+          <div className="col-sm-3 col-lg-2">
             <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">{locName} Dashboard</h3>
-              </div>
               <div className="panel-body" style={{ padding: 0 }}>
                 <ul className="nav nav-pills nav-stacked" style={{ margin: 0 }}>
+                  <li style={{ margin: 0 }}>
+                    <a href="/" onClick={e => { e.preventDefault(); navigate('/') }}
+                      style={{ borderRadius: 0 }}>
+                      <span className="glyphicon glyphicon-home" style={{ marginRight: 8 }}></span>
+                      {t('nav.home', undefined, lang)}
+                    </a>
+                  </li>
                   {tabs.map(tab => {
                     const tabLabel = tab.label.includes('.') ? t(tab.label, { location: locName }, lang) : tab.label
                     return (
@@ -65,16 +69,9 @@ export default function DashboardLayout() {
                 </ul>
               </div>
             </div>
-            <div className="text-center" style={{ marginTop: '0.5rem' }}>
-              <a href="/" onClick={e => { e.preventDefault(); navigate('/') }}
-                className="btn btn-default btn-sm">
-                <span className="glyphicon glyphicon-chevron-left" style={{ marginRight: 4 }}></span>
-                {t('nav.home', undefined, lang)}
-              </a>
-            </div>
           </div>
 
-          <div className="col-sm-9" style={{ overflowX: 'auto' }}>
+          <div className="col-sm-9 col-lg-10" style={{ overflowX: 'auto' }}>
             <Outlet />
           </div>
         </div>
