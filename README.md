@@ -115,6 +115,61 @@ the helper. Never place plaintext passwords or hashes in the repository, logs,
 tickets, or chat. See [DEPLOYMENT.md](DEPLOYMENT.md#dashboard-credentials) for
 the production runbook.
 
+## Database Migrations
+
+Schema is owned by Alembic. **Any change to `backend/models.py` needs a matching
+migration.** There is no `create_all` fallback: it created missing tables but
+never altered existing ones, which is exactly how `visitors.party_size` shipped
+to production without ever existing on the deployed volume.
+
+Migrations run automatically at app startup, so normal development needs no
+manual step. To inspect state:
+
+```bash
+python -m backend.migrate current      # revision this database is stamped at
+python -m backend.migrate history
+python -m backend.migrate heads
+```
+
+### Adding a column
+
+```bash
+# 1. Edit backend/models.py.
+
+# 2. Bring your local database to head FIRST. Autogenerate diffs the models
+#    against the live schema, so a stale database produces a wrong revision.
+export DATABASE_URL=sqlite+aiosqlite:///./passports.db
+python -m backend.migrate upgrade head
+
+# 3. Generate the revision. Revision ids are sequential and zero-padded.
+alembic -c backend/alembic.ini revision --autogenerate --rev-id 0003 \
+  -m "add visitors.example"
+
+# 4. READ the generated file in backend/migrations/versions/ and edit it.
+#    Autogenerate is a first draft, not an answer: it never detects renames
+#    (it emits drop + add, losing data) and it cannot know how to backfill a
+#    NOT NULL column on existing rows.
+
+# 5. Apply and test.
+python -m backend.migrate upgrade head
+python -m unittest discover -s backend/tests -v
+```
+
+Commit the revision alongside the model change. `test_migrations.py` asserts the
+migrated schema matches the ORM models, so forgetting the revision fails CI.
+
+Notes:
+
+- **Do not copy the `if column exists` guard in `0002`.** It is a one-time
+  reconciliation for databases that predate Alembic. Every revision from `0003`
+  on starts from an Alembic-managed schema and must be a plain, unguarded
+  operation.
+- SQLite cannot alter columns in place, so autogenerate wraps alters in
+  `op.batch_alter_table(...)`, which recreates the table. Check the generated
+  version preserves your data before running it on anything you care about.
+- Keep history linear. If `heads` prints more than one revision, `upgrade head`
+  fails at startup; merge the branch before deploying.
+
 ## Tech Stack
 
 - **Frontend**: React 18, Vite, Decorator 5 (Bootstrap 3 CDN)
@@ -140,6 +195,8 @@ backend/          FastAPI application
     models.py     SQLAlchemy models
     auth.py       JWT + password hashing
     seed.py       Database seeding
+    migrate.py    Migration runner + CLI
+    migrations/   Alembic environment and versions/
 ```
 
 ## API Endpoints

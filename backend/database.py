@@ -20,6 +20,21 @@ else:
     DATABASE_URL = _raw_url
 
 
+def sync_database_url() -> str:
+    """Synchronous counterpart of DATABASE_URL, used by Alembic.
+
+    Alembic's migration machinery is synchronous, so it cannot use the aiosqlite
+    driver. Dropping the ``+aiosqlite`` marker falls back to the stdlib sqlite3
+    driver; ``postgresql+psycopg`` is already usable synchronously by psycopg 3.
+    Both drivers open the same file and share its journal mode, so migrations
+    and the app engine see the same database.
+
+    Note this is meaningless for ``:memory:`` URLs, where each connection gets
+    its own private database -- migrations would run against a throwaway.
+    """
+    return DATABASE_URL.replace("+aiosqlite", "")
+
+
 class Base(DeclarativeBase):
     pass
 
@@ -58,10 +73,3 @@ def get_sessionmaker():
 async def get_db():
     async with get_sessionmaker()() as session:
         yield session
-
-
-async def init_db():
-    engine = get_engine()
-    async with engine.begin() as conn:
-        from . import models  # noqa: F401
-        await conn.run_sync(Base.metadata.create_all)
