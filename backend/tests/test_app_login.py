@@ -27,8 +27,8 @@ class LifespanPasswordHashTests(unittest.IsolatedAsyncioTestCase):
 
         test_app = FastAPI()
         with patch.object(app_module, "require_jwt_secret"), patch.object(
-            app_module, "init_db", new_callable=AsyncMock
-        ) as init_db, patch.object(
+            app_module, "run_migrations", new_callable=AsyncMock
+        ) as run_migrations, patch.object(
             app_module,
             "seed_database",
             new_callable=AsyncMock,
@@ -40,7 +40,7 @@ class LifespanPasswordHashTests(unittest.IsolatedAsyncioTestCase):
                     validated_hashes,
                 )
 
-        init_db.assert_awaited_once_with()
+        run_migrations.assert_awaited_once_with()
         seed_database.assert_awaited_once_with(fake_db)
 
 

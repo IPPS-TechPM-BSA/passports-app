@@ -112,6 +112,48 @@ kubectl -n tai-passport exec -it deploy/passports-app -- \
 Do not store plaintext dashboard passwords in Helm values, ConfigMaps, or the
 repository.
 
+## Schema migrations
+
+Database schema is managed by Alembic (`backend/migrations/`).
+
+- **When they run:** inside the app container during FastAPI startup — after the
+  `litestream-restore` initContainer has restored `/data/passports.db`, and while
+  the `litestream-replicate` sidecar is live, so every DDL statement lands in the
+  WAL and replicates within `syncInterval` (1s). Migrations deliberately do *not*
+  run in an initContainer, which would write to the database before the replicate
+  sidecar is watching it.
+- **Concurrency:** `replicaCount: 1` with `strategy.type: Recreate` guarantees
+  exactly one process ever migrates. No advisory lock or leader election is
+  needed; adding replicas later would require revisiting this.
+- **First rollout after this change** logs `adopting this database at baseline
+  revision 0001` exactly once, then applies `0002`
+  (`ALTER TABLE visitors ADD COLUMN party_size`). Later restarts log nothing new.
+  This fixes the `no such column: visitors.party_size` errors on
+  `GET /api/visitors` and on check-in.
+- **Failure mode:** a failing migration raises out of the lifespan, so uvicorn
+  exits and the pod crash-loops. Because the strategy is `Recreate`, the old pod
+  is already gone — a bad migration is an outage. Diagnose with
+  `kubectl -n tai-passport logs deploy/passports-app`, not `/api/health` (which
+  never comes up).
+- **Rollback:** rolling the image back does *not* undo schema changes. Revisions
+  are additive and old code tolerates extra columns, so image rollback is
+  normally safe on its own. Run `downgrade` only deliberately — it destroys the
+  data in dropped columns. The Litestream replica at `/replica/passports` is the
+  recovery point of last resort.
+
+```bash
+kubectl -n tai-passport exec deploy/passports-app -- python -m backend.migrate current -v
+kubectl -n tai-passport exec deploy/passports-app -- python -m backend.migrate history
+kubectl -n tai-passport exec deploy/passports-app -- python -m backend.migrate heads
+```
+
+Use the CLI for inspection. Apply schema changes by rolling out a new image and
+letting startup do it — running `upgrade` against a live pod writes to the same
+file the running app holds open, and the process will not pick up the change
+without a restart.
+
+No new env vars, Secret keys, chart values, or volumes are introduced.
+
 ## Ride-along services
 
 None. Single-container app.

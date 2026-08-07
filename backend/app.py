@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db, init_db
+from .database import get_db
 from .models import Location, Visitor, FormQuestion
 from .schemas import (
     CheckinRequest, CheckinResponse, VisitorResponse,
@@ -24,8 +24,22 @@ from .schemas import (
 from .auth import verify_password, create_token, decode_token, require_jwt_secret
 from .sse import notification_manager
 from .seed import seed_database
+from .migrate import run_migrations
 
 logger = logging.getLogger(__name__)
+
+# uvicorn configures handlers for its own loggers but leaves the root logger
+# alone, so records from backend.* would fall through to the WARNING-level
+# last-resort handler and vanish. Give the package its own stderr handler so
+# startup messages -- notably the one-time migration adoption line -- are
+# visible in `kubectl logs`.
+_package_logger = logging.getLogger("backend")
+if not _package_logger.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(levelname)s:     %(message)s"))
+    _package_logger.addHandler(_handler)
+    _package_logger.propagate = False
+_package_logger.setLevel(os.environ.get("LOG_LEVEL", "INFO").upper())
 
 _startup_error: str | None = None
 
@@ -44,11 +58,14 @@ async def lifespan(app: FastAPI):
     global _startup_error
     require_jwt_secret()
     try:
-        await init_db()
+        # Must complete before any other database access: run_migrations opens
+        # its own short-lived sync connection, so nothing else may hold one
+        # open while DDL runs.
+        await run_migrations()
         async for db in get_db():
             app.state.location_password_hashes = await seed_database(db)
             break
-        logger.info("Database initialized successfully")
+        logger.info("Database migrations applied and seed data ensured")
     except Exception as e:
         _startup_error = f"Database init failed: {e}"
         logger.exception(_startup_error)

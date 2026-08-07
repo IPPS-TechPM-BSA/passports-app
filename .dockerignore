@@ -1,0 +1,33 @@
+# The frontend stage runs `npm ci` and the backend stage `pip install`, so host
+# dependency trees must never enter the build context: they would overwrite the
+# freshly installed ones (COPY . .) and ship host-platform binaries into a linux
+# image.
+node_modules/
+backend/venv/
+venv/
+.venv/
+
+# Leading **/ is required: Docker ignore patterns do not recurse otherwise.
+**/__pycache__/
+**/*.pyc
+**/*.egg-info/
+
+# Build output — the frontend stage produces its own dist/.
+dist/
+
+# Secrets and local state must never reach the image.
+.env
+.env*.local
+*.db
+backups/
+
+.git/
+.github/
+.vercel
+.DS_Store
+
+# Docs and deploy manifests are not needed at runtime.
+chart/
+scripts/
+*.md
+docker-compose.yml
