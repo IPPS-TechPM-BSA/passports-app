@@ -58,7 +58,7 @@ const DEFAULT_CHECKLIST_QUESTIONS: ChecklistQuestions = {
   payment: { title: 'Form of Payment', description: 'Do you have a credit card, check, or money order for processing fees?' },
 }
 
-export default function KioskStepper() {
+export default function KioskStepperUpdated() {
   const { location } = useParams<{ location: string }>()
   const navigate = useNavigate()
   const { currentLanguage, setKioskLocation } = useApp()
@@ -165,7 +165,6 @@ export default function KioskStepper() {
       setAlertMsg(t('confirm.appComplete', undefined, currentLanguage))
       return false
     }
-    if (data.appComplete === false) return true
     if (data.checklist.photo === null || data.checklist.citizenship === null ||
         data.checklist.id === null || data.checklist.payment === null) {
       setAlertMsg(t('confirm.checklist', undefined, currentLanguage))
@@ -498,7 +497,7 @@ export default function KioskStepper() {
                         {t('yes', undefined, currentLanguage)}
                       </button>
                       <button className="btn btn-sm" style={yesNoBtnStyle(data.appComplete === false)}
-                        onClick={() => { set({ appComplete: false, checklist: { photo: null, citizenship: null, id: null, payment: null } }) }}>
+                        onClick={() => { set({ appComplete: false }) }}>
                         <span className="glyphicon glyphicon-remove" style={{ marginRight: 4 }}></span>
                         {t('no', undefined, currentLanguage)}
                       </button>
@@ -508,7 +507,7 @@ export default function KioskStepper() {
               </div>
             </div>
 
-            {data.appComplete === true && ['photo', 'citizenship', 'id', 'payment'].map(field => {
+            {data.appComplete !== null && ['photo', 'citizenship', 'id', 'payment'].map(field => {
               const val = data.checklist[field as keyof typeof data.checklist]
               const question = checklistQuestions[field] ?? DEFAULT_CHECKLIST_QUESTIONS[field]
               return (
@@ -543,35 +542,18 @@ export default function KioskStepper() {
         )
 
       case 4: {
-        const incomplete = data.serviceType === 'passports' && data.appComplete === false
         const name = `${data.formData.firstName} ${data.formData.lastName}`
         return (
           <div className="text-center" style={{ padding: '2rem 0' }}>
-            {!incomplete && (
-              <div style={{
-                width: 80, height: 80, borderRadius: '50%', background: '#4BB543',
-                color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: '1.5rem',
-              }}>
-                <span className="glyphicon glyphicon-ok" style={{ fontSize: '2.5rem' }}></span>
-              </div>
-            )}
-            {incomplete ? (
-              <>
-                <h2 className="page-header" style={{ border: 'none' }}>
-                  {t('incomplete.thankYou', { name }, currentLanguage)}
-                </h2>
-                <div className="alert alert-warning" style={{ maxWidth: 500, margin: '1rem auto' }}>
-                  <span className="glyphicon glyphicon-warning-sign" style={{ marginRight: 6 }}></span>
-                  {t('incomplete.action', undefined, currentLanguage)}
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="page-header" style={{ border: 'none' }}>{t('success.title', undefined, currentLanguage)}</h2>
-                <p className="lead">{t('success.desc', { name }, currentLanguage)}</p>
-              </>
-            )}
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%', background: '#4BB543',
+              color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: '1.5rem',
+            }}>
+              <span className="glyphicon glyphicon-ok" style={{ fontSize: '2.5rem' }}></span>
+            </div>
+            <h2 className="page-header" style={{ border: 'none' }}>{t('success.title', undefined, currentLanguage)}</h2>
+            <p className="lead">{t('success.desc', { name }, currentLanguage)}</p>
             <p style={{ color: '#6B7C96', fontStyle: 'italic', marginTop: '1.5rem' }}>
               {t('redirecting', { seconds: countdown }, currentLanguage)}
             </p>
