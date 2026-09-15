@@ -58,7 +58,7 @@ const DEFAULT_CHECKLIST_QUESTIONS: ChecklistQuestions = {
   payment: { title: 'Form of Payment', description: 'Do you have a credit card, check, or money order for processing fees?' },
 }
 
-export default function KioskStepperUpdated() {
+export default function KioskStepper() {
   const { location } = useParams<{ location: string }>()
   const navigate = useNavigate()
   const { currentLanguage, setKioskLocation } = useApp()
