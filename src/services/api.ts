@@ -1,3 +1,5 @@
+import { AUTH_STORAGE_KEY } from './authStorage'
+
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -9,6 +11,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (token) headers['Authorization'] = `Bearer ${token}`
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers })
+  if (res.status === 401 && !path.startsWith('/auth/login')) {
+    localStorage.removeItem(AUTH_STORAGE_KEY)
+    window.location.href = '/dashboard/login'
+  }
   if (!res.ok) {
     const body = await res.text()
     throw new Error(`${res.status} ${res.statusText}: ${body}`)
@@ -40,10 +46,7 @@ export const api = {
     return fetch(`${API_BASE}/visitors/export?location=${location}`).then(r => r.blob())
   },
   getQuestions() {
-    return request('/questions')
-  },
-  updateQuestions(data: Record<string, unknown>) {
-    return request('/questions', { method: 'PUT', body: JSON.stringify(data) })
+    return request<FormQuestion[]>('/questions')
   },
   getStats(location: string) {
     return request(`/stats?location=${location}`)
@@ -51,4 +54,80 @@ export const api = {
   login(password: string) {
     return request('/auth/login', { method: 'POST', body: JSON.stringify({ password }) })
   },
+  getSurveyQuestions() {
+    return request<SurveyQuestion[]>('/survey/questions')
+  },
+  updateSurveyQuestions(questions: SurveyQuestionInput[], token: string) {
+    return request<SurveyQuestion[]>('/survey/questions', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ questions }),
+    })
+  },
+  submitSurveyResponse(data: SurveySubmission) {
+    return request('/survey/responses', { method: 'POST', body: JSON.stringify(data) })
+  },
+  deleteSurveyResponses(ids: string[], token: string) {
+    return request<{ ok: boolean; deleted: number }>('/survey/responses/bulk-delete', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ids }),
+    })
+  },
+  getSurveyResponses(location: string, token: string) {
+    return request<SurveyResponseRecord[]>(`/survey/responses?location=${location}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  },
+}
+
+export interface FormQuestion {
+  key: string
+  title: string
+  description: string
+  /** Must be answered Yes or No before a passport visitor can finish. */
+  required: boolean
+}
+
+export type SurveyQuestionType = 'checkbox' | 'text' | 'rating' | 'multiselect'
+/** A list of the chosen options for a "select all that apply" question. */
+export type SurveyAnswerValue = boolean | number | string | string[] | null
+
+export interface SurveyQuestion {
+  id: string
+  type: SurveyQuestionType
+  label: string
+  required: boolean
+  /** The possible selections; empty unless the type is 'multiselect'. */
+  options: string[]
+}
+
+export interface SurveyQuestionInput {
+  /** A saved question's id, so it (and its answers) is kept; omitted for a new question. */
+  id?: string
+  question_type: SurveyQuestionType
+  label: string
+  required: boolean
+  options: string[]
+}
+
+export interface SurveySubmission {
+  location_id: string
+  name: string
+  email: string
+  answers: { question_id: string; value: SurveyAnswerValue }[]
+}
+
+export interface SurveyResponseRecord {
+  id: string
+  location_id: string
+  name: string
+  email: string
+  answers: {
+    question_id: string
+    type: SurveyQuestionType
+    label: string
+    value: SurveyAnswerValue
+ }[]
+  submitted_at: string
 }

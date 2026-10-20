@@ -69,6 +69,145 @@ body,
   .dashboard-container { max-width: 1700px; }
 }
 
+/* Touch screens have no hover, and a tapped card would otherwise stay lifted. */
+@media (hover: none) {
+  .panel[role="button"]:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Tablet kiosk: the check-in card fills the whole screen (see
+   useKioskFullscreen). The site header, navigation and footer are not
+   rendered in this mode. */
+.kiosk-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* dvh tracks Safari's collapsing toolbars; vh above is the fallback. */
+  height: 100dvh;
+  background: #fff;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* No double-tap zoom or rubber-band scrolling of the page behind the card. */
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kiosk-fullscreen .kiosk-topbar {
+  display: grid;
+  flex-shrink: 0;
+  /* Navigation | location title | language, with the title truly centred. */
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 2rem;
+  background: #182B49;
+  color: #fff;
+}
+
+.kiosk-fullscreen .kiosk-topbar-title {
+  font-family: Teko-SemiBold, sans-serif;
+  font-size: 1.75rem;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.kiosk-fullscreen .kiosk-topbar .dropdown {
+  position: relative;
+}
+
+.kiosk-fullscreen .kiosk-topbar button {
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.kiosk-fullscreen .kiosk-nav {
+  display: flex;
+  gap: 0.25rem;
+  /* Line the first item's text up with the content below. */
+  margin-left: -1rem;
+}
+
+.kiosk-fullscreen .kiosk-language {
+  justify-self: end;
+}
+
+.kiosk-fullscreen .kiosk-language > button {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.kiosk-fullscreen .kiosk-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+/* The theme gives menus a z-index of 7; they must sit above the backdrop or
+   a tap on a menu item only reaches the backdrop and closes the menu. */
+.kiosk-fullscreen .kiosk-topbar .dropdown-menu {
+  z-index: 1001;
+}
+
+/* Rows tall enough to tap. */
+.kiosk-fullscreen .kiosk-topbar .dropdown-menu > li > a {
+  padding: 12px 20px;
+  font-size: 1rem;
+}
+
+.kiosk-fullscreen .kiosk-progress {
+  flex-shrink: 0;
+  padding: 1.25rem 3rem 0;
+}
+
+/* The step indicator's own bottom gap is for the desktop layout. */
+.kiosk-fullscreen .kiosk-progress > .row {
+  margin-bottom: 0 !important;
+}
+
+/* The only part that scrolls, so the buttons below stay on screen when a
+   step is taller than the display or the on-screen keyboard is open. */
+.kiosk-fullscreen .kiosk-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.5rem 3rem;
+}
+
+/* Auto margins centre a short step vertically and collapse for a tall one. */
+.kiosk-fullscreen .kiosk-body-inner {
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.kiosk-fullscreen .kiosk-footer {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  padding: 1rem 3rem;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f8f8;
+}
+
+.kiosk-fullscreen .kiosk-footer .btn {
+  min-width: 180px;
+  margin: 0;
+}
+
 /* Focus ring for accessibility — matches UCSD Blue */
 a:focus, button:focus, .btn:focus, input:focus, select:focus, textarea:focus {
   outline: 3px solid #00629B;

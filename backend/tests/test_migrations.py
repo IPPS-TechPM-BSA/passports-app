@@ -121,7 +121,14 @@ class FreshDatabaseTests(_MigrationCase):
 
         self.assertEqual(
             self.tables(),
-            {"locations", "visitors", "form_questions", "alembic_version"},
+            {
+                "locations",
+                "visitors",
+                "form_questions",
+                "survey_questions",
+                "survey_responses",
+                "alembic_version",
+            },
         )
         self.assertEqual(self.stamped_revision(), self.head())
 
@@ -193,6 +200,51 @@ class LegacyDatabaseAdoptionTests(_MigrationCase):
 
         self.assertEqual(self.stamped_revision(), self.head())
         self.assertIn("party_size", self.columns("visitors"))
+
+
+class PruneSurveyAnswersMigrationTests(_MigrationCase):
+    """0009 deletes stored answers to questions no longer on the survey."""
+
+    def test_old_answers_are_deleted_and_renumbered_ones_relinked(self):
+        from alembic import command
+        import json
+
+        command.upgrade(make_alembic_config(self.url), "0008")
+        answers = [
+            # Current question, current id: kept.
+            {"question_id": "q-rating", "type": "rating", "label": "Rate us", "value": 5},
+            # Same label and type under an id from an earlier save: re-linked.
+            {"question_id": "old-text", "type": "text", "label": "Comments", "value": "Nice"},
+            # No longer on the survey: deleted.
+            {"question_id": "old-check", "type": "checkbox", "label": "Friendly?", "value": True},
+            # Same label but a different type: deleted.
+            {"question_id": "old-rate", "type": "text", "label": "Rate us", "value": "5"},
+        ]
+        with closing(sqlite3.connect(self.db_path)) as conn:
+            conn.execute("INSERT INTO locations VALUES ('csc', 'CSC', 'hash')")
+            conn.execute(
+                "INSERT INTO survey_questions (id, position, question_type, label, required) VALUES "
+                "('q-rating', 0, 'rating', 'Rate us', 1), ('q-text', 1, 'text', 'Comments', 0)"
+            )
+            conn.execute(
+                "INSERT INTO survey_responses (id, location_id, name, email, answers, submitted_at) "
+                "VALUES ('r1', 'csc', 'Ada', 'ada@example.com', ?, '2026-10-01 17:00:00')",
+                (json.dumps(answers),),
+            )
+            conn.commit()
+
+        upgrade_to_head(self.url)
+
+        with closing(sqlite3.connect(self.db_path)) as conn:
+            stored = json.loads(conn.execute("SELECT answers FROM survey_responses").fetchone()[0])
+        self.assertEqual(
+            [(a["question_id"], a["value"]) for a in stored],
+            [("q-rating", 5), ("q-text", "Nice")],
+        )
+
+    def test_database_without_questions_is_left_alone(self):
+        upgrade_to_head(self.url)
+        self.assertEqual(self.stamped_revision(), self.head())
 
 
 class StampTargetTests(_MigrationCase):

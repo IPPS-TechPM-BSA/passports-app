@@ -1,14 +1,20 @@
 import os
 
 import bcrypt
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import Location, FormQuestion
+from .models import Location, FormQuestion, SurveyQuestion
 
 REQUIRED_LOCATIONS = {
     "csc": "CSC",
     "bookstore": "Bookstore",
 }
+
+DEFAULT_SURVEY_QUESTIONS = [
+    ("rating", "How would you rate your overall experience?", True),
+    ("checkbox", "Was our staff friendly and helpful?", True),
+    ("text", "How can we improve your experience?", False),
+]
 
 
 def _password_hash_env(loc_id: str) -> str:
@@ -85,7 +91,9 @@ async def seed_database(db: AsyncSession) -> dict[str, str]:
             existing.name = name
             existing.password_hash = password_hash
 
-    # Seed default form questions
+    # Seed default form questions only when the table is empty: staff can
+    # delete questions from the dashboard, and those must not come back on
+    # the next restart.
     defaults = {
         "photo": {
             "title": "Passport Photo",
@@ -105,11 +113,27 @@ async def seed_database(db: AsyncSession) -> dict[str, str]:
         },
     }
 
-    for key, val in defaults.items():
-        result = await db.execute(select(FormQuestion).where(FormQuestion.key == key))
-        existing = result.scalar_one_or_none()
-        if existing is None:
-            db.add(FormQuestion(key=key, title=val["title"], description=val["description"]))
+    result = await db.execute(select(func.count()).select_from(FormQuestion))
+    if result.scalar_one() == 0:
+        for position, (key, val) in enumerate(defaults.items()):
+            db.add(FormQuestion(
+                key=key,
+                position=position,
+                title=val["title"],
+                description=val["description"],
+            ))
+
+    # Seed the customer experience survey only when the table is empty, so
+    # dashboard edits survive restarts.
+    result = await db.execute(select(func.count()).select_from(SurveyQuestion))
+    if result.scalar_one() == 0:
+        for position, (question_type, label, required) in enumerate(DEFAULT_SURVEY_QUESTIONS):
+            db.add(SurveyQuestion(
+                position=position,
+                question_type=question_type,
+                label=label,
+                required=required,
+            ))
 
     await db.commit()
     return configured_password_hashes

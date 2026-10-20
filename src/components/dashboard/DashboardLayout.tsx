@@ -28,8 +28,9 @@ export default function DashboardLayout() {
   const locName = auth.locationId === 'bookstore' ? 'Bookstore' : 'CSC'
   const tabs = [
     { path: '/dashboard/visitor-log', label: 'nav.visitorLog' },
+    { path: '/dashboard/experience-log', label: 'nav.experienceLog' },
     { path: '/dashboard/questions', label: 'nav.formQuestions' },
-    { path: '/dashboard/subscribers', label: 'subscribers.title' },
+    { path: '/dashboard/survey', label: 'nav.survey' },
     { path: '/dashboard/reports', label: 'nav.reports' },
     { path: '/dashboard/qr', label: 'qr.title' },
   ]
@@ -42,25 +43,12 @@ export default function DashboardLayout() {
             <div className="panel panel-default">
               <div className="panel-body" style={{ padding: 0 }}>
                 <ul className="nav nav-pills nav-stacked" style={{ margin: 0 }}>
-                  <li style={{ margin: 0 }}>
-                    <a href="/" onClick={e => { e.preventDefault(); navigate('/') }}
-                      style={{ borderRadius: 0 }}>
-                      <span className="glyphicon glyphicon-home" style={{ marginRight: 8 }}></span>
-                      {t('nav.home', undefined, lang)}
-                    </a>
-                  </li>
                   {tabs.map(tab => {
                     const tabLabel = tab.label.includes('.') ? t(tab.label, { location: locName }, lang) : tab.label
                     return (
                       <li key={tab.path} className={location.pathname === tab.path ? 'active' : ''} style={{ margin: 0 }}>
                         <a href={tab.path} onClick={e => { e.preventDefault(); navigate(tab.path) }}
                           style={{ borderRadius: 0 }}>
-                          <span className={`glyphicon glyphicon-${
-                            tab.label === 'nav.visitorLog' ? 'list-alt' :
-                            tab.label === 'nav.formQuestions' ? 'edit' :
-                            tab.label === 'subscribers.title' ? 'envelope' :
-                            tab.label === 'nav.reports' ? 'signal' : 'phone'
-                          }`} style={{ marginRight: 8 }}></span>
                           {tabLabel}
                         </a>
                       </li>
