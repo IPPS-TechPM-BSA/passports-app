@@ -26,11 +26,14 @@ class Visitor(Base):
     email = Column(String(255), nullable=True)
     phone = Column(String(20), nullable=False)
     party_size = Column(Integer, nullable=True)
-    visit_type = Column(String(20), nullable=False)       # appointment, walk-in, returning
-    service_type = Column(String(20), nullable=True)      # passports, notary, photo-only
+    visit_type = Column(String(20), nullable=False)       # appointment, walk-in (older rows may be "returning")
+    service_type = Column(String(60), nullable=True)      # comma-separated: passports, notary, photo-only
     photo_format = Column(String(20), nullable=True)      # digital, both, printed
     app_complete = Column(Boolean, nullable=True)
     checklist = Column(Text, nullable=True)               # JSON string
+    # Customer Survey step answers, comma-separated keys (see schemas.py).
+    affiliations = Column(String(100), nullable=True)
+    referral_sources = Column(String(200), nullable=True)
     subscribe = Column(Boolean, default=False)
     notes = Column(String(100), default="")
     status = Column(String(20), default="Checked In")     # Checked In, Signed Out
@@ -44,6 +47,31 @@ class Visitor(Base):
 class FormQuestion(Base):
     __tablename__ = "form_questions"
 
-    key = Column(String(50), primary_key=True)   # photo, citizenship, id, payment
+    key = Column(String(50), primary_key=True)   # photo, citizenship, id, payment, or a slug of a staff-added title
+    position = Column(Integer, nullable=False, default=0)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=False)
+    # Required questions must be answered Yes or No before a passport visitor can finish.
+    required = Column(Boolean, nullable=False, default=True)
+
+
+class SurveyQuestion(Base):
+    __tablename__ = "survey_questions"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    position = Column(Integer, nullable=False, default=0)
+    question_type = Column(String(20), nullable=False)   # checkbox, text, rating, multiselect
+    label = Column(String(200), nullable=False)
+    required = Column(Boolean, nullable=False, default=False)
+    options = Column(Text, nullable=True)                # JSON list of selections (multiselect only)
+
+
+class SurveyResponse(Base):
+    __tablename__ = "survey_responses"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    location_id = Column(String(20), ForeignKey("locations.id"), nullable=False)
+    name = Column(String(200), nullable=False)
+    email = Column(String(255), nullable=False)
+    answers = Column(Text, nullable=False)               # JSON snapshot: [{question_id, type, label, value}]
+    submitted_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))

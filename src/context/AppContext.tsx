@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
+import { clearStoredAuth, loadStoredAuth, saveStoredAuth } from '../services/authStorage'
+import { saveKioskLocation } from '../services/kioskLocation'
 
 export type Language = 'en' | 'es' | 'zh' | 'vi'
 export type LocationId = 'csc' | 'bookstore'
@@ -27,13 +29,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>({
     currentLanguage: 'en',
     kioskLocation: null,
-    auth: null,
+    auth: loadStoredAuth(),
   })
 
   const setLanguage = useCallback((lang: Language) => setState(s => ({ ...s, currentLanguage: lang })), [])
-  const setKioskLocation = useCallback((loc: LocationId | null) => setState(s => ({ ...s, kioskLocation: loc })), [])
-  const login = useCallback((token: string, locationId: LocationId) => setState(s => ({ ...s, auth: { token, locationId } })), [])
-  const logout = useCallback(() => setState(s => ({ ...s, auth: null })), [])
+  const setKioskLocation = useCallback((loc: LocationId | null) => {
+    if (loc) saveKioskLocation(loc)
+    setState(s => ({ ...s, kioskLocation: loc }))
+  }, [])
+  const login = useCallback((token: string, locationId: LocationId) => {
+    const auth = { token, locationId }
+    saveStoredAuth(auth)
+    setState(s => ({ ...s, auth }))
+  }, [])
+  const logout = useCallback(() => {
+    clearStoredAuth()
+    setState(s => ({ ...s, auth: null }))
+  }, [])
 
   const value = useMemo<AppContextValue>(
     () => ({ ...state, setLanguage, setKioskLocation, login, logout }),

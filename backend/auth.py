@@ -4,7 +4,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRY_HOURS = 8
+JWT_EXPIRY_HOURS = 24
 
 
 def get_jwt_secret() -> str:

@@ -32,11 +32,6 @@ export default function LoginPage() {
       <div className="container" style={{ paddingTop: '3rem', paddingBottom: '4rem' }}>
         <div className="row">
           <div className="col-sm-6 col-sm-offset-3">
-            <ol className="breadcrumb breadcrumbs-list" aria-label="Breadcrumb">
-              <li><a href="/" onClick={e => { e.preventDefault(); navigate('/') }}>{t('nav.home', undefined, lang)}</a></li>
-              <li className="active">{t('login.title', undefined, lang)}</li>
-            </ol>
-
             <div className="panel panel-primary">
               <div className="panel-heading">
                 <h3 className="panel-title">{t('login.title', undefined, lang)}</h3>
@@ -50,7 +45,6 @@ export default function LoginPage() {
                       placeholder={t('login.placeholder', undefined, lang)}
                       value={password} onChange={e => setPassword(e.target.value)}
                       autoFocus />
-                    <p className="help-block">{t('login.help', undefined, lang)}</p>
                   </div>
 
                   {error && (
@@ -66,14 +60,6 @@ export default function LoginPage() {
                   </button>
                 </form>
               </div>
-            </div>
-
-            <div className="text-center">
-              <a href="/" onClick={e => { e.preventDefault(); navigate('/') }}
-                className="btn btn-link">
-                <span className="glyphicon glyphicon-chevron-left" style={{ marginRight: 4 }}></span>
-                {t('login.back', undefined, lang)}
-              </a>
             </div>
           </div>
         </div>
