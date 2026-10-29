@@ -1,11 +1,16 @@
-FROM node:22-alpine AS frontend-builder
+# Node 26 (current release line): tracks the 2026-10 security releases
+# automatically (Node2Shell CVE-2026-111497 brotli RCE fix + compromised
+# eMudhra/emSign intermediates dropped from the bundled root store).
+FROM node:26-alpine AS frontend-builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM python:3.13-slim
+# 2026-10 eMudhra CA compromise: 3.13.18 rejects the compromised emSign
+# intermediates at the interpreter level and ships a current ca-certificates.
+FROM python:3.13.18-slim
 WORKDIR /app
 
 RUN addgroup --system --gid 1000 appgroup && \

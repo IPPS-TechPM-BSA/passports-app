@@ -8,3 +8,5 @@ bcrypt==5.0.0
 pyjwt==2.13.0
 pydantic==2.13.4
 python-dotenv==1.2.2
+# eMudhra/emSign CA compromise: first release that drops emSign ECC Root CA - G3
+certifi>=2026.10.19
